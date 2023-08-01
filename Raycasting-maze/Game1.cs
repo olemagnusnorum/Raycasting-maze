@@ -25,6 +25,9 @@ public class Game1 : Game
     private int screenHeight = 550;
 
     private int  screenWidth = 550;
+
+    private double rotSpeed = 0.05;
+    private float walkSpeed = 0.06f;
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -39,7 +42,7 @@ public class Game1 : Game
         mazeGenerator.GenerateMaze(0,0,1,1);
         this.mazeBitMap = mazeGenerator.GetMazeBitMap();
         //over riding the maze to make it easier
-        this.mazeBitMap = new int[,]{{1,1,1,1,1,1,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,0,0,2,0,0,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,1,1,1,1,1,1}};
+        //this.mazeBitMap = new int[,]{{1,1,1,1,1,1,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,0,0,2,0,0,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,1,1,1,1,1,1}};
         this.cellScale = this.screenHeight/mazeBitMap.GetLongLength(0);
 
         _graphics.PreferredBackBufferHeight = this.screenHeight;
@@ -64,6 +67,7 @@ public class Game1 : Game
         
         /// toggle view
         this.CheckToggleView();
+        this.CheckMovement();
         // TODO: Add your update logic here
 
         base.Update(gameTime);
@@ -133,6 +137,27 @@ public class Game1 : Game
         if (this.togglePressed && Keyboard.GetState().IsKeyUp(Keys.T))
         {
             this.togglePressed = false;
+        }
+    }
+
+    private void CheckMovement()
+    {
+        //TODO;
+        if (Keyboard.GetState().IsKeyDown(Keys.Left))
+        {
+            this.RotateLeft(this.rotSpeed);
+        }
+        if (Keyboard.GetState().IsKeyDown(Keys.Right))
+        {
+            this.RotateRight(this.rotSpeed);
+        }
+        if (Keyboard.GetState().IsKeyDown(Keys.Up))
+        {
+            this.MoveForward(this.walkSpeed);
+        }
+        if (Keyboard.GetState().IsKeyDown(Keys.Down))
+        {
+            this.MoveBackwards(this.walkSpeed);
         }
     }
 
@@ -224,7 +249,10 @@ public class Game1 : Game
 
             // calculate the height of the wall on screen
             int lineHeight = (int)(this.screenHeight / (hitWallDist));
-            Console.WriteLine(lineHeight);
+            if (lineHeight > this.screenHeight)
+            {
+                lineHeight = this.screenHeight;
+            }
 
             //calculate lowest and highest pixel to fill in current stripe
             int drawStart = -lineHeight / 2 + this.screenHeight / 2;
@@ -255,19 +283,62 @@ public class Game1 : Game
                 }
             }
         }
-        RotateRight();
     }
 
-    private void RotateRight(){
-        double rotSpeed = 0.004;
+    private void RotateRight(double rotSpeed)
+    {
         float oldDirX = player.GetDirX();
         player.SetDirX(player.GetDirX() * (float)Math.Cos(-rotSpeed) - player.GetDirY() * (float)Math.Sin(-rotSpeed));
         player.SetDirY(oldDirX * (float)Math.Sin(-rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed));
         float oldPlaneX = player.GetCameraPlaneX();
         player.SetCameraPlaneX(player.GetCameraPlaneX() * (float)Math.Cos(-rotSpeed) - player.GetCameraPlaneY() * (float)Math.Sin(-rotSpeed));
-        player.SetPlaneY(oldPlaneX * (float)Math.Sin(-rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(-rotSpeed));
-
-        Console.WriteLine(player.GetDirX());
+        player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(-rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(-rotSpeed));
     }
    
+   private void RotateLeft(double rotSpeed)
+   {
+        float oldDirX = player.GetDirX();
+        player.SetDirX(player.GetDirX() * (float)Math.Cos(rotSpeed) - player.GetDirY() * (float)Math.Sin(rotSpeed));
+        player.SetDirY(oldDirX * (float)Math.Sin(rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed));
+        float oldPlaneX = player.GetCameraPlaneX();
+        player.SetCameraPlaneX(player.GetCameraPlaneX() * (float)Math.Cos(-rotSpeed) - player.GetCameraPlaneY() * (float)Math.Sin(rotSpeed));
+        player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(rotSpeed));
+   }
+
+   private void MoveForward(float walkSpeed)
+   {
+        float prevPosX = player.GetPosX();
+        float nextPosX = prevPosX + player.GetDirX() * walkSpeed;
+        if (!PlayerInsideWall(nextPosX, player.GetPosY()))
+        {
+            player.setPosX(nextPosX);
+        }
+        float prevPosY = player.GetPosY();
+        float nextPosY = prevPosY + player.GetDirY() * walkSpeed;
+        if (!PlayerInsideWall(player.GetPosX(), nextPosY))
+        {
+            player.setPosY(nextPosY);
+        }
+   }
+
+   private void MoveBackwards(float walkSpeed)
+   {
+        float prevPosX = player.GetPosX();
+        float nextPosX = prevPosX - player.GetDirX() * walkSpeed;
+        if (!PlayerInsideWall(nextPosX, player.GetPosY()))
+        {
+            player.setPosX(nextPosX);
+        }
+        float prevPosY = player.GetPosY();
+        float nextPosY = prevPosY - player.GetDirY() * walkSpeed;
+        if (!PlayerInsideWall(player.GetPosX(), nextPosY))
+        {
+            player.setPosY(nextPosY);
+        }
+   }
+
+   private bool PlayerInsideWall(float posX, float posY)
+   {
+        return this.mazeBitMap[(int) posY, (int) posX] > 0;
+   }
 }

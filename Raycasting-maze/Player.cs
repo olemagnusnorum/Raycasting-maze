@@ -27,46 +27,44 @@ namespace Raycasting_maze
         {
             return this.posX;
         }
-
-
         public float GetPosY()
         {
             return this.posY;
         }
-
+        public void setPosX(float posX)
+        {
+            this.posX = posX;
+        }
+        public void setPosY(float posY)
+        {
+            this.posY = posY;
+        }
         public float GetDirX()
         {
             return this.dirX;
         }
-
         public void SetDirX(float dirX){
             this.dirX = dirX;
         }
-
         public float GetDirY()
         {
             return this.dirY;
         }
-
         public void SetDirY(float dirY){
             this.dirY = dirY;
         }
-
         public float GetCameraPlaneX()
         {
             return this.cameraPlaneX;
         }
-
         public void SetCameraPlaneX(float cameraPlaneX){
             this.cameraPlaneX = cameraPlaneX;
         }
-        
         public float GetCameraPlaneY()
         {
             return this.cameraPlaneY;
         }
-
-        public void SetPlaneY(float cameraPlaneY){
+        public void SetCameraPlaneY(float cameraPlaneY){
             this.cameraPlaneY = cameraPlaneY;
         }
     }
