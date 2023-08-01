@@ -190,23 +190,30 @@ namespace Raycasting_maze
         public int[,] GetMazeBitMap()
         {
             int[,] mazeBitMap = new int[this.numRows * 2 + 1, this.numCols * 2 + 1];
+            // intiializing all as walls
+            for (int i = 0; i < mazeBitMap.GetLength(0); i++){
+                for (int j = 0; j < mazeBitMap.GetLength(1); j++){
+                    mazeBitMap[i,j] = 1;
+                }
+            }
+
             for (int i = 0; i < this.mazeArray.Length; i++)
             {
                 Cell cell = this.mazeArray[i];
                 int bitMapRow = (i / this.numCols) * 2 + 1;
                 int bitMapCol = (i % this.numCols) * 2 + 1;
-                mazeBitMap[bitMapRow, bitMapCol] = 1;
+                mazeBitMap[bitMapRow, bitMapCol] = 0;
 
                 /// checking lef wall
                 if (cell.WallRemoved(Left))
                 {
-                    mazeBitMap[bitMapRow, bitMapCol - 1] = 1;
+                    mazeBitMap[bitMapRow, bitMapCol - 1] = 0;
                 }
 
                 /// cheking top wall
                 if (cell.WallRemoved(Top))
                 {
-                    mazeBitMap[bitMapRow - 1, bitMapCol] = 1;
+                    mazeBitMap[bitMapRow - 1, bitMapCol] = 0;
                 }
             }
             return mazeBitMap;
