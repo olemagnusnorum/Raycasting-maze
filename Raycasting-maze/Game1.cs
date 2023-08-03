@@ -28,6 +28,7 @@ public class Game1 : Game
     private float walkSpeed = 0.03f;
 
     private int cellSize;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -46,8 +47,6 @@ public class Game1 : Game
         _graphics.PreferredBackBufferWidth = this.screenWidth;
         _graphics.ApplyChanges();
         base.Initialize();
-        Console.WriteLine(this.cellSize);
-        
     }
 
     protected override void LoadContent()
@@ -88,8 +87,7 @@ public class Game1 : Game
             _spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, 0, this.screenWidth, this.screenHeight/2), Color.Black);
             _spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, this.screenHeight/2, this.screenWidth, this.screenHeight/2), Color.CornflowerBlue);
             this.Raycasting(_spriteBatch);
-            this.DrawTopDownMaze(_spriteBatch, 0.2f);
-            this.DrawPlayer(_spriteBatch, 0.2f);
+            this.DrawMinimap(_spriteBatch, 0.2f);
             _spriteBatch.End();
         }
         
@@ -126,6 +124,12 @@ public class Game1 : Game
     {
         /// have to change this one
         spriteBatch.Draw(this.whiteRectangle, new Rectangle(((int)(this.cellSize*scale)*(int)this.player.GetPosX() + (int)(this.cellSize*0.2f)), ((int)(this.cellSize*scale)*(int)this.player.GetPosY() + (int)(this.cellSize*0.2)), (int)(this.cellSize*scale) - 2*(int)(this.cellSize*0.2), (int)(this.cellSize*scale) - 2*(int)(this.cellSize*0.2)), Color.Orange);
+    }
+
+    private void DrawMinimap(SpriteBatch spriteBatch, float scale)
+    {
+        this.DrawTopDownMaze(spriteBatch, scale);
+        this.DrawPlayer(spriteBatch, scale);
     }
 
     private void CheckToggleView()
