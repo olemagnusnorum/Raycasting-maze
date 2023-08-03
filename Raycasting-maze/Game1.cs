@@ -14,7 +14,7 @@ public class Game1 : Game
 
     private int[,] mazeBitMap;
 
-    private Player player = new Player(1.5f,1.5f, 0, 1, 0.66f, 0);
+    private Player player = new Player(1.5f,1.5f, 0, 1, -0.66f, 0);
 
     private bool topDownView = true;
 
@@ -124,7 +124,7 @@ public class Game1 : Game
     private void DrawPlayer(SpriteBatch spriteBatch)
     {
         /// have to change this one
-        spriteBatch.Draw(this.whiteRectangle, new Rectangle(this.cellSize*(int)this.player.GetPosX()-5, this.cellSize*(int)this.player.GetPosY()-5, 10, 10), Color.Pink);
+        spriteBatch.Draw(this.whiteRectangle, new Rectangle((this.cellSize*(int)this.player.GetPosX()+2), (this.cellSize*(int)this.player.GetPosY()+2), this.cellSize-4, this.cellSize-4), Color.Orange);
     }
 
     private void CheckToggleView()
@@ -292,7 +292,7 @@ public class Game1 : Game
         }
     }
 
-    private void RotateRight(double rotSpeed)
+    private void RotateLeft(double rotSpeed)
     {
         float oldDirX = player.GetDirX();
         player.SetDirX(player.GetDirX() * (float)Math.Cos(-rotSpeed) - player.GetDirY() * (float)Math.Sin(-rotSpeed));
@@ -302,7 +302,7 @@ public class Game1 : Game
         player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(-rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(-rotSpeed));
     }
    
-   private void RotateLeft(double rotSpeed)
+   private void RotateRight(double rotSpeed)
    {
         float oldDirX = player.GetDirX();
         player.SetDirX(player.GetDirX() * (float)Math.Cos(rotSpeed) - player.GetDirY() * (float)Math.Sin(rotSpeed));
