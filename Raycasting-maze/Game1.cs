@@ -37,18 +37,17 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-        MazeGenerator mazeGenerator = new MazeGenerator(10,10);
+        MazeGenerator mazeGenerator = new MazeGenerator(10,15);
         mazeGenerator.GenerateMaze(0,0,1,1);
         this.mazeBitMap = mazeGenerator.GetMazeBitMap();
-        //over riding the maze to make it easier
-        //this.mazeBitMap = new int[,]{{1,1,1,1,1,1,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,0,0,2,0,0,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,1,1,1,1,1,1}};
         this.cellSize = this.GetCellSize();
         
         _graphics.PreferredBackBufferHeight = this.screenHeight;
         _graphics.PreferredBackBufferWidth = this.screenWidth;
         _graphics.ApplyChanges();
         base.Initialize();
+        Console.WriteLine(this.cellSize);
+        
     }
 
     protected override void LoadContent()
@@ -79,8 +78,8 @@ public class Game1 : Game
         if (topDownView)
         {
             _spriteBatch.Begin();
-            this.DrawTopDownMaze(_spriteBatch);
-            this.DrawPlayer(_spriteBatch);
+            this.DrawTopDownMaze(_spriteBatch, 1.0f);
+            this.DrawPlayer(_spriteBatch, 1.0f);
             _spriteBatch.End();
         }
         else 
@@ -89,6 +88,8 @@ public class Game1 : Game
             _spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, 0, this.screenWidth, this.screenHeight/2), Color.Black);
             _spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, this.screenHeight/2, this.screenWidth, this.screenHeight/2), Color.CornflowerBlue);
             this.Raycasting(_spriteBatch);
+            this.DrawTopDownMaze(_spriteBatch, 0.2f);
+            this.DrawPlayer(_spriteBatch, 0.2f);
             _spriteBatch.End();
         }
         
@@ -102,7 +103,7 @@ public class Game1 : Game
         return (sizeX < sizeY)? sizeX : sizeY;
     }
 
-    private void DrawTopDownMaze(SpriteBatch spriteBatch)
+    private void DrawTopDownMaze(SpriteBatch spriteBatch, float scale)
     {
         for (int i = 0; i < mazeBitMap.GetLength(0); i++)
         {
@@ -111,20 +112,20 @@ public class Game1 : Game
                 if (mazeBitMap[i,j] > 0)
                 {
                     // 50 should be replaced with cellScale
-                    _spriteBatch.Draw(this.whiteRectangle, new Rectangle(this.cellSize*j, this.cellSize*i, this.cellSize, this.cellSize), Color.White);
+                    _spriteBatch.Draw(this.whiteRectangle, new Rectangle((int)(this.cellSize*scale)*j, (int)(this.cellSize*scale)*i, (int)(this.cellSize*scale), (int)(this.cellSize*scale)), Color.White);
                 }
                 else
                 {
-                    _spriteBatch.Draw(this.whiteRectangle, new Rectangle(this.cellSize*j, this.cellSize*i, this.cellSize, this.cellSize), Color.Black);
+                    _spriteBatch.Draw(this.whiteRectangle, new Rectangle((int)(this.cellSize*scale)*j, (int)(this.cellSize*scale)*i, (int)(this.cellSize*scale), (int)(this.cellSize*scale)), Color.Black);
                 }
             }
         }
     }
 
-    private void DrawPlayer(SpriteBatch spriteBatch)
+    private void DrawPlayer(SpriteBatch spriteBatch, float scale)
     {
         /// have to change this one
-        spriteBatch.Draw(this.whiteRectangle, new Rectangle((this.cellSize*(int)this.player.GetPosX()+2), (this.cellSize*(int)this.player.GetPosY()+2), this.cellSize-4, this.cellSize-4), Color.Orange);
+        spriteBatch.Draw(this.whiteRectangle, new Rectangle(((int)(this.cellSize*scale)*(int)this.player.GetPosX() + (int)(this.cellSize*0.2f)), ((int)(this.cellSize*scale)*(int)this.player.GetPosY() + (int)(this.cellSize*0.2)), (int)(this.cellSize*scale) - 2*(int)(this.cellSize*0.2), (int)(this.cellSize*scale) - 2*(int)(this.cellSize*0.2)), Color.Orange);
     }
 
     private void CheckToggleView()
