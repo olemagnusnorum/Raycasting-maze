@@ -41,6 +41,7 @@ public class Game1 : Game
         MazeGenerator mazeGenerator = new MazeGenerator(10,15);
         mazeGenerator.GenerateMaze(0,0,1,1);
         this.mazeBitMap = mazeGenerator.GetMazeBitMap();
+        this.mazeBitMap = new int[,] {{1,1,1,1},{1,0,0,1},{0,0,0,1},{1,1,1,1}};
         this.cellSize = this.GetCellSize();
         
         _graphics.PreferredBackBufferHeight = this.screenHeight;
@@ -242,11 +243,14 @@ public class Game1 : Game
                     hitVericalWall = false;
                 }
                 // checking if ray hit wall
+                if (RayOutOfBounds(cellX, cellY)) break;
                 if (mazeBitMap[cellY, cellX] > 0)
                 {
                     hit = true;
                 }
             }
+            // check if ray hit a wall
+            if (hit == false) continue;
 
             // calculating length of the ray that hit the wall
             float hitWallDist;
@@ -295,6 +299,15 @@ public class Game1 : Game
                 }
             }
         }
+    }
+
+    private bool RayOutOfBounds(int cellX, int cellY)
+    {
+        if (cellX < 0) return true;
+        if (cellX >= this.mazeBitMap.GetLength(1)) return true;
+        if (cellY < 0) return true;
+        if (cellY >= this.mazeBitMap.GetLength(0)) return true;
+        return false;
     }
 
     private void RotateLeft(double rotSpeed)
