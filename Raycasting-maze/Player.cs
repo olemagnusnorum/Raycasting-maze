@@ -3,6 +3,8 @@ namespace Raycasting_maze
 {
     class Player
     {
+
+        private float size = 0.2f;
         private float posX;
         private float posY;
 
@@ -66,6 +68,11 @@ namespace Raycasting_maze
         }
         public void SetCameraPlaneY(float cameraPlaneY){
             this.cameraPlaneY = cameraPlaneY;
+        }
+
+        public float GetSize()
+        {
+            return this.size;
         }
     }
 }

@@ -29,6 +29,11 @@ public class Game1 : Game
 
     private int cellSize;
 
+    private Texture2D wallTexture;
+
+    private int textureWidth = 64;
+    private int textureHeight = 64;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -41,7 +46,7 @@ public class Game1 : Game
         MazeGenerator mazeGenerator = new MazeGenerator(10,15);
         mazeGenerator.GenerateMaze(0,0,1,1);
         this.mazeBitMap = mazeGenerator.GetMazeBitMap();
-        this.mazeBitMap = new int[,] {{1,1,1,1},{1,0,0,1},{0,0,0,1},{1,1,1,1}};
+        //this.mazeBitMap = new int[,] {{1,1,1,1},{1,0,0,1},{0,0,0,1},{1,1,1,1}};
         this.cellSize = this.GetCellSize();
         
         _graphics.PreferredBackBufferHeight = this.screenHeight;
@@ -56,6 +61,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         whiteRectangle = new Texture2D(GraphicsDevice, 1, 1);
         whiteRectangle.SetData(new[] {Color.White});
+        wallTexture = Content.Load<Texture2D>("brickwall");
         // TODO: use this.Content to load your game content here
     }
 
@@ -265,13 +271,43 @@ public class Game1 : Game
 
             // calculate the height of the wall on screen
             int lineHeight = (int)(this.screenHeight / (hitWallDist));
-            if (lineHeight > this.screenHeight)
-            {
-                lineHeight = this.screenHeight;
-            }
+            //if (lineHeight > this.screenHeight)
+            //{
+            //    lineHeight = this.screenHeight;
+            //}
 
-            //calculate lowest and highest pixel to fill in current stripe
             int drawStart = -lineHeight / 2 + this.screenHeight / 2;
+            //TODO: Test with the wall texture to make the world better use public void Draw(Texture2D texture, Rectangle destinationRectangle, Rectangle? sourceRectangle, Color color) for each column
+            // TODO: change this with a texture mapping
+
+            // calclating where the on the wall the ray hit
+            float presentageAllongTheWall;
+            if (hitVericalWall)
+            {
+                float exactWallHit = player.GetPosY() + rayDirY * hitWallDist;
+                presentageAllongTheWall = exactWallHit - (float)Math.Floor((double)exactWallHit);
+            }
+            else
+            {
+                float exactWallHit = player.GetPosX() + rayDirX * hitWallDist;
+                presentageAllongTheWall = exactWallHit - (float)Math.Floor((double)exactWallHit);
+            }
+            int textureXIndex = (int) (presentageAllongTheWall * this.textureWidth);
+
+            // if looking wright
+            if (hitVericalWall && rayDirX > 0)
+            {
+                textureXIndex = this.textureWidth - textureXIndex - 1;
+            }
+            // if looking down
+            if (!hitVericalWall && rayDirY < 0)
+            {
+                textureXIndex = this.textureWidth - textureXIndex - 1;
+            }
+            spriteBatch.Draw(this.wallTexture, new Rectangle(x, drawStart, 1, lineHeight), new Rectangle(textureXIndex, 0, 1, this.textureHeight), Color.White);
+            // CONTINUE....
+            //calculate lowest and highest pixel to fill in current stripe
+            /*
             if(drawStart < 0)
             {
                 drawStart = 0;
@@ -298,7 +334,9 @@ public class Game1 : Game
                     spriteBatch.Draw(this.whiteRectangle, new Rectangle(x, drawStart, 1, lineHeight), new Color(225,225,225));
                 }
             }
+            */
         }
+
     }
 
     private bool RayOutOfBounds(int cellX, int cellY)
@@ -334,13 +372,13 @@ public class Game1 : Game
    {
         float prevPosX = player.GetPosX();
         float nextPosX = prevPosX + player.GetDirX() * walkSpeed;
-        if (!PlayerInsideWall(nextPosX, player.GetPosY()))
+        if (!PlayerInsideWall(nextPosX + player.GetDirX() * player.GetSize(), player.GetPosY()))
         {
             player.setPosX(nextPosX);
         }
         float prevPosY = player.GetPosY();
         float nextPosY = prevPosY + player.GetDirY() * walkSpeed;
-        if (!PlayerInsideWall(player.GetPosX(), nextPosY))
+        if (!PlayerInsideWall(player.GetPosX(), nextPosY + player.GetDirY() * player.GetSize()))
         {
             player.setPosY(nextPosY);
         }
@@ -350,13 +388,13 @@ public class Game1 : Game
    {
         float prevPosX = player.GetPosX();
         float nextPosX = prevPosX - player.GetDirX() * walkSpeed;
-        if (!PlayerInsideWall(nextPosX, player.GetPosY()))
+        if (!PlayerInsideWall(nextPosX - player.GetDirX() * player.GetSize(), player.GetPosY()))
         {
             player.setPosX(nextPosX);
         }
         float prevPosY = player.GetPosY();
         float nextPosY = prevPosY - player.GetDirY() * walkSpeed;
-        if (!PlayerInsideWall(player.GetPosX(), nextPosY))
+        if (!PlayerInsideWall(player.GetPosX(), nextPosY - player.GetDirY() * player.GetSize()))
         {
             player.setPosY(nextPosY);
         }
