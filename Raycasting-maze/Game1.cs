@@ -304,37 +304,17 @@ public class Game1 : Game
             {
                 textureXIndex = this.textureWidth - textureXIndex - 1;
             }
-            spriteBatch.Draw(this.wallTexture, new Rectangle(x, drawStart, 1, lineHeight), new Rectangle(textureXIndex, 0, 1, this.textureHeight), Color.White);
-            // CONTINUE....
-            //calculate lowest and highest pixel to fill in current stripe
-            /*
-            if(drawStart < 0)
-            {
-                drawStart = 0;
-            }
-            if (mazeBitMap[cellY, cellX] == 2)
-            {
-                if (hitVericalWall)
-                {
-                    spriteBatch.Draw(this.whiteRectangle, new Rectangle(x, drawStart, 1, lineHeight), Color.Red);
-                }
-                else
-                {
-                    spriteBatch.Draw(this.whiteRectangle, new Rectangle(x, drawStart, 1, lineHeight), new Color(225, 0, 0));
-                }
-            }
-            else
-            {
-                if (hitVericalWall)
-                {
-                    spriteBatch.Draw(this.whiteRectangle, new Rectangle(x, drawStart, 1, lineHeight), Color.White);
-                }
-                else
-                {
-                    spriteBatch.Draw(this.whiteRectangle, new Rectangle(x, drawStart, 1, lineHeight), new Color(225,225,225));
-                }
-            }
-            */
+            
+            // adding shaiding
+            int minShadow = 30;
+            int longestDistance = 10;
+            float shadowScaler = Math.Min(hitWallDist/longestDistance, 1.0f);
+            shadowScaler = 1 - shadowScaler;
+            shadowScaler = shadowScaler * (255 - minShadow);
+            shadowScaler = shadowScaler + minShadow;
+            Console.WriteLine(shadowScaler);
+            Color shadow = new Color((int)shadowScaler, (int)shadowScaler, (int)shadowScaler);
+            spriteBatch.Draw(this.wallTexture, new Rectangle(x, drawStart, 1, lineHeight), new Rectangle(textureXIndex, 0, 1, this.textureHeight), shadow);
         }
 
     }
