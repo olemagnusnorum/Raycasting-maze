@@ -1,7 +1,7 @@
 
 namespace Raycasting_maze
 {
-    class Player
+    public class Player
     {
 
         private float size = 0.2f;
@@ -14,6 +14,9 @@ namespace Raycasting_maze
         // camera vector
         private float cameraPlaneX;
         private float cameraPlaneY;
+
+        private double rotSpeed = 0.05;
+        private float walkSpeed = 0.03f;
 
         public Player(float posX, float posY, float dirX, float dirY, float cameraPlaneX, float cameraPlaneY)
         {
