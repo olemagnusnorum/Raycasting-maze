@@ -22,7 +22,7 @@ public class Game1 : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        gameState = new GameState(this.screenWidth);
+        gameState = new GameState();
         renderer = new Renderer(Content, gameState, this.screenHeight, this.screenWidth);
     }
 
@@ -31,7 +31,6 @@ public class Game1 : Game
         this.gameState.Initialize();
         this.renderer.Initialize();
 
-        
         _graphics.PreferredBackBufferHeight = this.screenHeight;
         _graphics.PreferredBackBufferWidth = this.screenWidth;
         _graphics.ApplyChanges();
@@ -40,10 +39,8 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
-        
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         this.renderer.LoadContent(GraphicsDevice);
-        // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
@@ -53,6 +50,9 @@ public class Game1 : Game
             Exit();
         }
         this.gameState.Update(gameTime, this.screenWidth, this.screenHeight);
+        this.renderer.Update();
+
+        Console.WriteLine(1f / gameTime.ElapsedGameTime.TotalSeconds);
 
         base.Update(gameTime);
     }
