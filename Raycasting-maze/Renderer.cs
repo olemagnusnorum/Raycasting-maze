@@ -145,15 +145,6 @@ public class Renderer {
     private void DrawFloor(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(this.floorAndCeilingTexture, new Rectangle(0, 0, this.screenWidth, this.screenHeight), Color.White);
-        /*
-        for (int x = 0; x < this.screenWidth; x++)
-        {
-            for (int y = 0; y < this.screenHeight; y++)
-            {
-                spriteBatch.Draw(this.whiteRectangle, new Vector2(x,y), this.floorTextureBuffer[this.screenWidth*y+x]);
-            }
-        }
-        */
         
     }
 
@@ -165,7 +156,6 @@ public class Renderer {
         if (x + 1100 >= skyTextureWidth)
         {
             int wrapX = (x + 1100) % 5924;
-            // CHECK HOW THEY DID IT IN HERITIC
             float p1 = (skyTextureWidth-x)/1100f;
             spriteBatch.Draw(skyTexture, new Rectangle(0, 0, (int)(this.screenWidth*p1), this.screenHeight/2), new Rectangle(x, 0, skyTextureWidth-x, 275), Color.White);
             spriteBatch.Draw(skyTexture, new Rectangle((int)(this.screenWidth*p1), 0, this.screenWidth-(int)(this.screenWidth*p1), this.screenHeight/2), new Rectangle(0, 0, wrapX, 275), Color.White);
@@ -181,17 +171,8 @@ public class Renderer {
         this.raycastingResults.Clear();
         foreach (int indexColored in this.indexColored)
         {
-            //int y = indexColored / this.screenWidth;
-            //int x = indexColored - y * this.screenWidth;
-            //int mirrorIndex = this.screenWidth * (this.screenHeight - y) + x;
-            this.floorTextureBuffer[indexColored] = Color.Transparent;
-            //this.floorTextureBuffer[mirrorIndex] = Color.Transparent;
-            
+            this.floorTextureBuffer[indexColored] = Color.Transparent; 
         }
-        //for (int i = 0; i < this.floorTextureBuffer.Length; i++) 
-        //{
-        //    this.floorTextureBuffer[i] = Color.Transparent;
-        //}
         this.indexColored.Clear();
     
         for (int x = 0; x < screenWidth; x++)
@@ -384,7 +365,6 @@ public class Renderer {
                 //this.floorTextureBuffer[this.screenWidth * (this.screenHeight - pixelRow) + x] = floorTextureColor;
                 
                 this.indexColored.Add(this.screenWidth * pixelRow + x);
-                //this.indexColored.Add(this.screenWidth * (this.screenHeight - pixelRow) + x);
             }
         }
         
