@@ -31,7 +31,7 @@ public class GameState {
         MazeGenerator mazeGenerator = new MazeGenerator(10,15);
         mazeGenerator.GenerateMaze(0,0,1,1);
         this.mazeBitMap = mazeGenerator.GetMazeBitMap();
-        //this.mazeBitMap = new int[,] {{1,1,1,1,1,1,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,1,1,1,1,1,1}};
+        //this.mazeBitMap = new int[,] {{1,1,1,1,1,1,1,1},{1,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,1},{1,1,1,1,1,1,1,1}};
     } 
 
     public void Update(GameTime gameTime, int screenWidth, int screenHeight)
