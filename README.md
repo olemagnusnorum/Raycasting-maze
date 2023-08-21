@@ -15,7 +15,7 @@ By pressing **T** on the keyboard the view changes to the pseudo 3D perspective 
 
 Using raycasting makes it easy to make new levels just by changing the 2D array.
 
-![pseudo 3D view 2](/imgs/Maze3.png)
+![pseudo 3D view 3](/imgs/Maze3.png)
 
 
 **Note**: The floor rendering in this project is not efficient. For levels with open spaces, the floor rendering should be removed and replaced a colored background or one large texture covering the bottom half of the screen with the walls painted over.
