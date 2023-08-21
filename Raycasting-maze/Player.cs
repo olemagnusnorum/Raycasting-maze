@@ -15,9 +15,6 @@ namespace Raycasting_maze
         private float cameraPlaneX;
         private float cameraPlaneY;
 
-        private double rotSpeed = 0.05;
-        private float walkSpeed = 0.03f;
-
         public Player(float posX, float posY, float dirX, float dirY, float cameraPlaneX, float cameraPlaneY)
         {
             this.posX = posX;

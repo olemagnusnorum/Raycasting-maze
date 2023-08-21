@@ -20,6 +20,7 @@ public class GameState {
     private double rotSpeed = 0.05;
     private float walkSpeed = 0.03f;
 
+    private float playerAngle = 90.0f;
     public GameState ()
     {
         
@@ -30,11 +31,11 @@ public class GameState {
         MazeGenerator mazeGenerator = new MazeGenerator(10,15);
         mazeGenerator.GenerateMaze(0,0,1,1);
         this.mazeBitMap = mazeGenerator.GetMazeBitMap();
-        //this.mazeBitMap = new int[,] {{1,1,1,1},{1,0,0,1},{0,0,0,1},{1,1,1,1}};
+        //this.mazeBitMap = new int[,] {{1,1,1,1,1,1,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,0,0,0,0,0,1},{1,1,1,1,1,1,1}};
     } 
 
     public void Update(GameTime gameTime, int screenWidth, int screenHeight)
-    {    
+    {   
         this.CheckToggleView();
         this.CheckMovement();
     }
@@ -107,21 +108,41 @@ public class GameState {
     private void RotateLeft(double rotSpeed)
     {
         float oldDirX = player.GetDirX();
-        player.SetDirX(player.GetDirX() * (float)Math.Cos(-rotSpeed) - player.GetDirY() * (float)Math.Sin(-rotSpeed));
-        player.SetDirY(oldDirX * (float)Math.Sin(-rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed));
+        float dirX = player.GetDirX() * (float)Math.Cos(-rotSpeed) - player.GetDirY() * (float)Math.Sin(-rotSpeed);
+        if (dirX > 1) dirX = 1;
+        if (dirX < -1) dirX = -1;
+        player.SetDirX(dirX);
+        float dirY = oldDirX * (float)Math.Sin(-rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed);
+        if (dirY > 1) dirY = 1;
+        if (dirY <  -1) dirY = -1;
+        player.SetDirY(dirY);
         float oldPlaneX = player.GetCameraPlaneX();
         player.SetCameraPlaneX(player.GetCameraPlaneX() * (float)Math.Cos(-rotSpeed) - player.GetCameraPlaneY() * (float)Math.Sin(-rotSpeed));
         player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(-rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(-rotSpeed));
+
+        // finding player angle
+        this.playerAngle = (float)(180/Math.PI) * (float)Math.Acos((double)player.GetDirX());
+        if (player.GetDirY() < 0) this.playerAngle = 360 - this.playerAngle;
     }
    
    private void RotateRight(double rotSpeed)
    {
         float oldDirX = player.GetDirX();
-        player.SetDirX(player.GetDirX() * (float)Math.Cos(rotSpeed) - player.GetDirY() * (float)Math.Sin(rotSpeed));
-        player.SetDirY(oldDirX * (float)Math.Sin(rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed));
+        float dirX = player.GetDirX() * (float)Math.Cos(rotSpeed) - player.GetDirY() * (float)Math.Sin(rotSpeed);
+        if (dirX > 1) dirX = 1;
+        if (dirX < -1) dirX = -1;
+        player.SetDirX(dirX);
+        float dirY = oldDirX * (float)Math.Sin(rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed);
+        if (dirY > 1) dirY = 1;
+        if (dirY <  -1) dirY = -1;
+        player.SetDirY(dirY);
         float oldPlaneX = player.GetCameraPlaneX();
         player.SetCameraPlaneX(player.GetCameraPlaneX() * (float)Math.Cos(-rotSpeed) - player.GetCameraPlaneY() * (float)Math.Sin(rotSpeed));
         player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(rotSpeed));
+
+        //finding player angle fix so it does not just go from 0 to 180, but 0 to 360
+        this.playerAngle = (float)(180/Math.PI) * (float)Math.Acos((double)player.GetDirX());
+        if (player.GetDirY() < 0) this.playerAngle = 360 - this.playerAngle;
    }
 
    private void MoveForward(float walkSpeed)
@@ -158,7 +179,14 @@ public class GameState {
 
    public bool PlayerInsideWall(float posX, float posY)
    {
+        // TODO: make sure all sides of player is checked
         return this.mazeBitMap[(int) posY, (int) posX] > 0;
+   }
+
+
+   public float GetPlayerAngle()
+   {
+        return this.playerAngle;
    }
 }
 

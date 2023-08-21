@@ -52,8 +52,6 @@ public class Game1 : Game
         this.gameState.Update(gameTime, this.screenWidth, this.screenHeight);
         this.renderer.Update();
 
-        Console.WriteLine(1f / gameTime.ElapsedGameTime.TotalSeconds);
-
         base.Update(gameTime);
     }
 

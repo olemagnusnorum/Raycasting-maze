@@ -12,6 +12,8 @@ public class Renderer {
     private int textureHeight = 64;
     private float minimapScale = 0.2f;
 
+    private int fov = 66;
+
     ContentManager content;
     private GameState gs;
     private int cellSize;
@@ -20,11 +22,17 @@ public class Renderer {
 
     private Texture2D whiteRectangle;
     private Texture2D wallTexture;
+
+    private Texture2D barrelTexture;
+    private Texture2D skyTexture;
     private Texture2D floorTexture;
+    private Texture2D floorAndCeilingTexture;
     private Color[] floorTextureColors;
     
     private List<RaycastingResult> raycastingResults = new List<RaycastingResult>();
     private Color[] floorTextureBuffer;
+
+    private List<int> indexColored = new List<int>();
 
     public Renderer(ContentManager content, GameState gameState, int screenHeight, int screenWidth)
     {
@@ -46,13 +54,20 @@ public class Renderer {
         whiteRectangle = new Texture2D(graphicsDevice, 1, 1);
         whiteRectangle.SetData(new[] {Color.White});
         wallTexture = this.content.Load<Texture2D>("brickwall");
-        floorTexture = new Texture2D(graphicsDevice, this.screenWidth, this.screenHeight);
-        wallTexture.GetData<Color>(floorTextureColors);
+        barrelTexture = this.content.Load<Texture2D>("barrel");
+        skyTexture = this.content.Load<Texture2D>("moonbackground");
+        floorTexture = this.content.Load<Texture2D>("grassfloor");
+
+        floorAndCeilingTexture = new Texture2D(graphicsDevice, this.screenWidth, this.screenHeight);
+        floorTexture.GetData<Color>(floorTextureColors);
     }
 
     public void Update()
     {
-        this.Raycasting(this.screenWidth, this.screenHeight);
+        if (!gs.IsTopDownView())
+        {
+            this.Raycasting(this.screenWidth, this.screenHeight);
+        }
     }
 
     private int CalculateCellSize()
@@ -71,12 +86,12 @@ public class Renderer {
         }
         else 
         {
-            spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, 0, this.screenWidth, this.screenHeight/2), Color.Black);
+            spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, 0, this.screenWidth, this.screenHeight/2), Color.Green);
             spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, this.screenHeight/2, this.screenWidth, this.screenHeight/2), Color.CornflowerBlue);
+            this.DrawSky(spriteBatch);
             this.DrawWalls(spriteBatch);
             this.DrawFloor(spriteBatch);
             this.DrawMinimap(spriteBatch, 0.2f);
-            
         }
     }
 
@@ -129,16 +144,55 @@ public class Renderer {
 
     private void DrawFloor(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(this.floorTexture, new Rectangle(0, 0, this.screenWidth, this.screenHeight), Color.White);
+        spriteBatch.Draw(this.floorAndCeilingTexture, new Rectangle(0, 0, this.screenWidth, this.screenHeight), Color.White);
+        /*
+        for (int x = 0; x < this.screenWidth; x++)
+        {
+            for (int y = 0; y < this.screenHeight; y++)
+            {
+                spriteBatch.Draw(this.whiteRectangle, new Vector2(x,y), this.floorTextureBuffer[this.screenWidth*y+x]);
+            }
+        }
+        */
+        
+    }
+
+    private void DrawSky(SpriteBatch spriteBatch)
+    {
+        int x = (int) gs.GetPlayerAngle();
+        x = (int)(x * 16.45);
+        int skyTextureWidth = 5924;
+        if (x + 1100 >= skyTextureWidth)
+        {
+            int wrapX = (x + 1100) % 5924;
+            // CHECK HOW THEY DID IT IN HERITIC
+            float p1 = (skyTextureWidth-x)/1100f;
+            spriteBatch.Draw(skyTexture, new Rectangle(0, 0, (int)(this.screenWidth*p1), this.screenHeight/2), new Rectangle(x, 0, skyTextureWidth-x, 275), Color.White);
+            spriteBatch.Draw(skyTexture, new Rectangle((int)(this.screenWidth*p1), 0, this.screenWidth-(int)(this.screenWidth*p1), this.screenHeight/2), new Rectangle(0, 0, wrapX, 275), Color.White);
+        }
+        else
+        {
+            spriteBatch.Draw(skyTexture, new Rectangle(0, 0, this.screenWidth, this.screenHeight/2), new Rectangle(x, 0, 1100, 275), Color.White);
+        }
     }
 
     private void Raycasting(int screenWidth, int screenHeight)
     {
-        raycastingResults.Clear();
-        for (int i = 0; i < this.floorTextureBuffer.Length; i++) 
+        this.raycastingResults.Clear();
+        foreach (int indexColored in this.indexColored)
         {
-            this.floorTextureBuffer[i] = Color.Transparent;
+            //int y = indexColored / this.screenWidth;
+            //int x = indexColored - y * this.screenWidth;
+            //int mirrorIndex = this.screenWidth * (this.screenHeight - y) + x;
+            this.floorTextureBuffer[indexColored] = Color.Transparent;
+            //this.floorTextureBuffer[mirrorIndex] = Color.Transparent;
+            
         }
+        //for (int i = 0; i < this.floorTextureBuffer.Length; i++) 
+        //{
+        //    this.floorTextureBuffer[i] = Color.Transparent;
+        //}
+        this.indexColored.Clear();
     
         for (int x = 0; x < screenWidth; x++)
         {
@@ -327,12 +381,14 @@ public class Renderer {
                 floorTextureColor.B = (byte) (int)(Convert.ToInt32(floorTextureColor.B) * floorShadowScaler/255);
                 this.floorTextureBuffer[this.screenWidth * pixelRow + x] = floorTextureColor;
                 //ceiling is just mirrored since they share the tile
-                this.floorTextureBuffer[this.screenWidth * (this.screenHeight - pixelRow) + x] = floorTextureColor;
+                //this.floorTextureBuffer[this.screenWidth * (this.screenHeight - pixelRow) + x] = floorTextureColor;
                 
+                this.indexColored.Add(this.screenWidth * pixelRow + x);
+                //this.indexColored.Add(this.screenWidth * (this.screenHeight - pixelRow) + x);
             }
         }
         
-        this.floorTexture.SetData<Color>(this.floorTextureBuffer);
+        this.floorAndCeilingTexture.SetData<Color>(this.floorTextureBuffer);
     }
 
 }
