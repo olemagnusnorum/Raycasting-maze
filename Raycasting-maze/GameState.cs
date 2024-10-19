@@ -1,63 +1,61 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 using System;
-using System.Collections.Generic;
 
 namespace Raycasting_maze;
 
-public class GameState {
+public class GameState
+{
 
-    private int[,] mazeBitMap;
+    public int[,] MazeBitMap { get; private set; }
 
-    private Player player = new Player(1.5f, 1.5f, 0, 1, -0.66f, 0);
+    public Player Player { get; private set; } = new Player(1.5f, 1.5f, 0, 1, -0.66f, 0);
 
-    private bool topDownView = true;
+    private bool TopDownView = true;
 
-    private bool togglePressed = false;
+    private bool TogglePressed = false;
 
-    private double rotSpeed = 0.05;
-    private float walkSpeed = 0.03f;
+    private readonly double RotSpeed = 0.05;
+    private readonly float WalkSpeed = 0.03f;
 
-    private float playerAngle = 90.0f;
-    public GameState ()
+    public float PlayerAngle { get; private set; } = 90.0f;
+    public GameState()
     {
-        
-    }   
+
+    }
 
     public void Initialize()
     {
-        MazeGenerator mazeGenerator = new MazeGenerator(10,15);
-        mazeGenerator.GenerateMaze(0,0,1,1);
-        this.mazeBitMap = mazeGenerator.GetMazeBitMap();
-        //this.mazeBitMap = new int[,] {{1,1,1,1,1,1,1,1},{1,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,1},{1,1,1,1,1,1,1,1}};
-    } 
+        MazeGenerator mazeGenerator = new MazeGenerator(10, 15);
+        mazeGenerator.GenerateMaze(0, 0, 1, 1);
+        MazeBitMap = mazeGenerator.GetMazeBitMap();
+        //mazeBitMap = new int[,] {{1,1,1,1,1,1,1,1},{1,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,1},{1,1,1,1,1,1,1,1}};
+    }
 
     public void Update(GameTime gameTime, int screenWidth, int screenHeight)
-    {   
-        this.CheckToggleView();
-        this.CheckMovement();
+    {
+        CheckToggleView();
+        CheckMovement();
     }
 
     public void CheckToggleView()
     {
         // toggling pov
-        if (!this.togglePressed && Keyboard.GetState().IsKeyDown(Keys.T) && this.topDownView)
+        if (!TogglePressed && Keyboard.GetState().IsKeyDown(Keys.T) && TopDownView)
         {
-            this.togglePressed = true;
-            this.topDownView = false;
-            
+            TogglePressed = true;
+            TopDownView = false;
+
         }
         // toggling top-down view
-        if (!this.togglePressed && Keyboard.GetState().IsKeyDown(Keys.T) && !this.topDownView)
-        {   
-            this.togglePressed = true;
-            this.topDownView = true;
-        }
-        if (this.togglePressed && Keyboard.GetState().IsKeyUp(Keys.T))
+        if (!TogglePressed && Keyboard.GetState().IsKeyDown(Keys.T) && !TopDownView)
         {
-            this.togglePressed = false;
+            TogglePressed = true;
+            TopDownView = true;
+        }
+        if (TogglePressed && Keyboard.GetState().IsKeyUp(Keys.T))
+        {
+            TogglePressed = false;
         }
     }
 
@@ -65,129 +63,113 @@ public class GameState {
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Left))
         {
-            this.RotateLeft(this.rotSpeed);
+            RotateLeft(RotSpeed);
         }
         if (Keyboard.GetState().IsKeyDown(Keys.Right))
         {
-            this.RotateRight(this.rotSpeed);
+            RotateRight(RotSpeed);
         }
         if (Keyboard.GetState().IsKeyDown(Keys.Up))
         {
-            this.MoveForward(this.walkSpeed);
+            MoveForward(WalkSpeed);
         }
         if (Keyboard.GetState().IsKeyDown(Keys.Down))
         {
-            this.MoveBackwards(this.walkSpeed);
+            MoveBackwards(WalkSpeed);
         }
     }
 
     public bool IsTopDownView()
     {
-        return this.topDownView;
-    }
-
-    public int[,] GetMazeBitMap()
-    {
-        return this.mazeBitMap;
-    }
-
-    public Player GetPlayer()
-    {
-        return this.player;
+        return TopDownView;
     }
 
     public bool RayOutOfBounds(int cellX, int cellY)
     {
         if (cellX < 0) return true;
-        if (cellX >= this.mazeBitMap.GetLength(1)) return true;
+        if (cellX >= MazeBitMap.GetLength(1)) return true;
         if (cellY < 0) return true;
-        if (cellY >= this.mazeBitMap.GetLength(0)) return true;
+        if (cellY >= MazeBitMap.GetLength(0)) return true;
         return false;
     }
 
     private void RotateLeft(double rotSpeed)
     {
-        float oldDirX = player.GetDirX();
-        float dirX = player.GetDirX() * (float)Math.Cos(-rotSpeed) - player.GetDirY() * (float)Math.Sin(-rotSpeed);
+        float oldDirX = Player.DirX;
+        float dirX = Player.DirX * (float)Math.Cos(-rotSpeed) - Player.DirY * (float)Math.Sin(-rotSpeed);
         if (dirX > 1) dirX = 1;
         if (dirX < -1) dirX = -1;
-        player.SetDirX(dirX);
-        float dirY = oldDirX * (float)Math.Sin(-rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed);
+        Player.SetDirX(dirX);
+        float dirY = oldDirX * (float)Math.Sin(-rotSpeed) + Player.DirY * (float)Math.Cos(-rotSpeed);
         if (dirY > 1) dirY = 1;
-        if (dirY <  -1) dirY = -1;
-        player.SetDirY(dirY);
-        float oldPlaneX = player.GetCameraPlaneX();
-        player.SetCameraPlaneX(player.GetCameraPlaneX() * (float)Math.Cos(-rotSpeed) - player.GetCameraPlaneY() * (float)Math.Sin(-rotSpeed));
-        player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(-rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(-rotSpeed));
+        if (dirY < -1) dirY = -1;
+        Player.SetDirY(dirY);
+        float oldPlaneX = Player.CameraPlaneX;
+        Player.SetCameraPlaneX(Player.CameraPlaneX * (float)Math.Cos(-rotSpeed) - Player.CameraPlaneY * (float)Math.Sin(-rotSpeed));
+        Player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(-rotSpeed) + Player.CameraPlaneY * (float)Math.Cos(-rotSpeed));
 
         // finding player angle
-        this.playerAngle = (float)(180/Math.PI) * (float)Math.Acos((double)player.GetDirX());
-        if (player.GetDirY() < 0) this.playerAngle = 360 - this.playerAngle;
+        PlayerAngle = (float)(180 / Math.PI) * (float)Math.Acos((double)Player.DirX);
+        if (Player.DirY < 0) PlayerAngle = 360 - PlayerAngle;
     }
-   
-   private void RotateRight(double rotSpeed)
-   {
-        float oldDirX = player.GetDirX();
-        float dirX = player.GetDirX() * (float)Math.Cos(rotSpeed) - player.GetDirY() * (float)Math.Sin(rotSpeed);
+
+    private void RotateRight(double rotSpeed)
+    {
+        float oldDirX = Player.DirX;
+        float dirX = Player.DirX * (float)Math.Cos(rotSpeed) - Player.DirY * (float)Math.Sin(rotSpeed);
         if (dirX > 1) dirX = 1;
         if (dirX < -1) dirX = -1;
-        player.SetDirX(dirX);
-        float dirY = oldDirX * (float)Math.Sin(rotSpeed) + player.GetDirY() * (float)Math.Cos(-rotSpeed);
+        Player.SetDirX(dirX);
+        float dirY = oldDirX * (float)Math.Sin(rotSpeed) + Player.DirY * (float)Math.Cos(-rotSpeed);
         if (dirY > 1) dirY = 1;
-        if (dirY <  -1) dirY = -1;
-        player.SetDirY(dirY);
-        float oldPlaneX = player.GetCameraPlaneX();
-        player.SetCameraPlaneX(player.GetCameraPlaneX() * (float)Math.Cos(-rotSpeed) - player.GetCameraPlaneY() * (float)Math.Sin(rotSpeed));
-        player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(rotSpeed) + player.GetCameraPlaneY() * (float)Math.Cos(rotSpeed));
+        if (dirY < -1) dirY = -1;
+        Player.SetDirY(dirY);
+        float oldPlaneX = Player.CameraPlaneX;
+        Player.SetCameraPlaneX(Player.CameraPlaneX * (float)Math.Cos(-rotSpeed) - Player.CameraPlaneY * (float)Math.Sin(rotSpeed));
+        Player.SetCameraPlaneY(oldPlaneX * (float)Math.Sin(rotSpeed) + Player.CameraPlaneY * (float)Math.Cos(rotSpeed));
 
         //finding player angle fix so it does not just go from 0 to 180, but 0 to 360
-        this.playerAngle = (float)(180/Math.PI) * (float)Math.Acos((double)player.GetDirX());
-        if (player.GetDirY() < 0) this.playerAngle = 360 - this.playerAngle;
-   }
+        PlayerAngle = (float)(180 / Math.PI) * (float)Math.Acos((double)Player.DirX);
+        if (Player.DirY < 0) PlayerAngle = 360 - PlayerAngle;
+    }
 
-   private void MoveForward(float walkSpeed)
-   {
-        float prevPosX = player.GetPosX();
-        float nextPosX = prevPosX + player.GetDirX() * walkSpeed;
-        if (!PlayerInsideWall(nextPosX + player.GetDirX() * player.GetSize(), player.GetPosY()))
+    private void MoveForward(float walkSpeed)
+    {
+        float prevPosX = Player.PosX;
+        float nextPosX = prevPosX + Player.DirX * walkSpeed;
+        if (!PlayerInsideWall(nextPosX + Player.DirX * Player.Size, Player.PosY))
         {
-            player.setPosX(nextPosX);
+            Player.SetPosX(nextPosX);
         }
-        float prevPosY = player.GetPosY();
-        float nextPosY = prevPosY + player.GetDirY() * walkSpeed;
-        if (!PlayerInsideWall(player.GetPosX(), nextPosY + player.GetDirY() * player.GetSize()))
+        float prevPosY = Player.PosY;
+        float nextPosY = prevPosY + Player.DirY * walkSpeed;
+        if (!PlayerInsideWall(Player.PosX, nextPosY + Player.DirY * Player.Size))
         {
-            player.setPosY(nextPosY);
+            Player.SetPosY(nextPosY);
         }
-   }
+    }
 
-   private void MoveBackwards(float walkSpeed)
-   {
-        float prevPosX = player.GetPosX();
-        float nextPosX = prevPosX - player.GetDirX() * walkSpeed;
-        if (!PlayerInsideWall(nextPosX - player.GetDirX() * player.GetSize(), player.GetPosY()))
+    private void MoveBackwards(float walkSpeed)
+    {
+        float prevPosX = Player.PosX;
+        float nextPosX = prevPosX - Player.DirX * walkSpeed;
+        if (!PlayerInsideWall(nextPosX - Player.DirX * Player.Size, Player.PosY))
         {
-            player.setPosX(nextPosX);
+            Player.SetPosX(nextPosX);
         }
-        float prevPosY = player.GetPosY();
-        float nextPosY = prevPosY - player.GetDirY() * walkSpeed;
-        if (!PlayerInsideWall(player.GetPosX(), nextPosY - player.GetDirY() * player.GetSize()))
+        float prevPosY = Player.PosY;
+        float nextPosY = prevPosY - Player.DirY * walkSpeed;
+        if (!PlayerInsideWall(Player.PosX, nextPosY - Player.DirY * Player.Size))
         {
-            player.setPosY(nextPosY);
+            Player.SetPosY(nextPosY);
         }
-   }
+    }
 
-   public bool PlayerInsideWall(float posX, float posY)
-   {
+    public bool PlayerInsideWall(float posX, float posY)
+    {
         // TODO: make sure all sides of player is checked
-        return this.mazeBitMap[(int) posY, (int) posX] > 0;
-   }
-
-
-   public float GetPlayerAngle()
-   {
-        return this.playerAngle;
-   }
+        return MazeBitMap[(int)posY, (int)posX] > 0;
+    }
 }
 
 

@@ -12,7 +12,7 @@ public class Game1 : Game
 
     private int screenHeight = 550;
 
-    private int  screenWidth = 1100;
+    private int screenWidth = 1100;
 
     GameState gameState;
     Renderer renderer;
@@ -23,16 +23,16 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         gameState = new GameState();
-        renderer = new Renderer(Content, gameState, this.screenHeight, this.screenWidth);
+        renderer = new Renderer(Content, gameState, screenHeight, screenWidth);
     }
 
     protected override void Initialize()
     {
-        this.gameState.Initialize();
-        this.renderer.Initialize();
+        gameState.Initialize();
+        renderer.Initialize();
 
-        _graphics.PreferredBackBufferHeight = this.screenHeight;
-        _graphics.PreferredBackBufferWidth = this.screenWidth;
+        _graphics.PreferredBackBufferHeight = screenHeight;
+        _graphics.PreferredBackBufferWidth = screenWidth;
         _graphics.ApplyChanges();
         base.Initialize();
     }
@@ -40,17 +40,17 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        this.renderer.LoadContent(GraphicsDevice);
+        renderer.LoadContent(GraphicsDevice);
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) 
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
             Exit();
         }
-        this.gameState.Update(gameTime, this.screenWidth, this.screenHeight);
-        this.renderer.Update();
+        gameState.Update(gameTime, screenWidth, screenHeight);
+        renderer.Update();
 
         base.Update(gameTime);
     }
@@ -59,7 +59,7 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.White);
         _spriteBatch.Begin();
-        this.renderer.Draw(this._spriteBatch);
+        renderer.Draw(_spriteBatch);
         _spriteBatch.End();
         base.Draw(gameTime);
     }

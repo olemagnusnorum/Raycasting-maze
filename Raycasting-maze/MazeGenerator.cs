@@ -6,46 +6,46 @@ namespace Raycasting_maze
 
     class Cell
     {
-        private int row;
-        private int col;
+        private readonly int Row;
+        private readonly int Col;
 
-        private bool visited = false;
-        public bool[] walls = {true, true, true, true};
+        private bool Visited = false;
+        public bool[] Walls = { true, true, true, true };
 
         public Cell(int row, int col)
         {
-            this.row = row;
-            this.col = col;
+            Row = row;
+            Col = col;
         }
 
         public int GetRow()
         {
-            return this.row;
+            return Row;
         }
 
         public int GetCol()
         {
-            return this.col;
+            return Col;
         }
 
         public bool IsVisited()
         {
-            return this.visited;
+            return Visited;
         }
 
         public void SetVisited(bool visited)
         {
-            this.visited = visited;
+            Visited = visited;
         }
 
         public void RemoveWall(int wallIndex)
         {
-            this.walls[wallIndex] = false;
+            Walls[wallIndex] = false;
         }
 
         public bool WallRemoved(int wallIndex)
         {
-            return !this.walls[wallIndex];
+            return !Walls[wallIndex];
         }
 
     }
@@ -53,59 +53,59 @@ namespace Raycasting_maze
 
     class MazeGenerator
     {
-        private int numRows;
-        private int numCols;
-        
-        private Cell[] mazeArray;
-        
-        private Random rnd = new Random();
+        private readonly int NumRows;
+        private readonly int NumCols;
+
+        private readonly Cell[] MazeArray;
+
+        private readonly Random Rnd = new Random();
 
         private const int Left = 0;
         private const int Top = 1;
         private const int Right = 2;
         private const int Bottom = 3;
-        
+
         public MazeGenerator(int numRows, int numCols)
         {
-            this.numRows = numRows;
-            this.numCols = numCols;
-            this.mazeArray = new Cell[this.numRows * this.numCols];
-            
+            NumRows = numRows;
+            NumCols = numCols;
+            MazeArray = new Cell[NumRows * NumCols];
+
         }
 
         private void PopulateMaze()
         {
-            for (int i = 0; i < this.mazeArray.Length; i++)
+            for (int i = 0; i < MazeArray.Length; i++)
             {
-                this.mazeArray[i] = new Cell(i / this.numCols, i % this.numCols);
+                MazeArray[i] = new Cell(i / NumCols, i % NumCols);
             }
         }
 
         private int GetMazeArrayIndex(int row, int col)
         {
-            return row * this.numCols + col;
+            return row * NumCols + col;
         }
 
         private List<Cell> GetNeighbours(Cell currentCell)
         {
             List<Cell> neighbours = new List<Cell>();
             /// gjor finere og mer tydelig
-            int leftCellIndex = currentCell.GetCol() > 0 ? this.GetMazeArrayIndex(currentCell.GetRow(), currentCell.GetCol() - 1) : -1;
-            int topCellIndex = currentCell.GetRow() > 0 ? this.GetMazeArrayIndex(currentCell.GetRow() - 1, currentCell.GetCol()) : -1;
-            int rightCellIndex = currentCell.GetCol() < this.numCols - 1 ? this.GetMazeArrayIndex(currentCell.GetRow(), currentCell.GetCol() + 1) : -1;
-            int bottomCellIndex = currentCell.GetRow() < this.numRows - 1 ? this.GetMazeArrayIndex(currentCell.GetRow() + 1, currentCell.GetCol()): -1;
+            int leftCellIndex = currentCell.GetCol() > 0 ? GetMazeArrayIndex(currentCell.GetRow(), currentCell.GetCol() - 1) : -1;
+            int topCellIndex = currentCell.GetRow() > 0 ? GetMazeArrayIndex(currentCell.GetRow() - 1, currentCell.GetCol()) : -1;
+            int rightCellIndex = currentCell.GetCol() < NumCols - 1 ? GetMazeArrayIndex(currentCell.GetRow(), currentCell.GetCol() + 1) : -1;
+            int bottomCellIndex = currentCell.GetRow() < NumRows - 1 ? GetMazeArrayIndex(currentCell.GetRow() + 1, currentCell.GetCol()) : -1;
 
             if (leftCellIndex >= 0)
             {
-                Cell leftCell = this.mazeArray[leftCellIndex];
-                if (!leftCell.IsVisited()) 
+                Cell leftCell = MazeArray[leftCellIndex];
+                if (!leftCell.IsVisited())
                 {
                     neighbours.Add(leftCell);
                 }
             }
             if (topCellIndex >= 0)
             {
-                Cell topCell = this.mazeArray[topCellIndex];
+                Cell topCell = MazeArray[topCellIndex];
                 if (!topCell.IsVisited())
                 {
                     neighbours.Add(topCell);
@@ -113,7 +113,7 @@ namespace Raycasting_maze
             }
             if (rightCellIndex >= 0)
             {
-                Cell rightCell = this.mazeArray[rightCellIndex];
+                Cell rightCell = MazeArray[rightCellIndex];
                 if (!rightCell.IsVisited())
                 {
                     neighbours.Add(rightCell);
@@ -121,7 +121,7 @@ namespace Raycasting_maze
             }
             if (bottomCellIndex >= 0)
             {
-                Cell bottomCell = this.mazeArray[bottomCellIndex];
+                Cell bottomCell = MazeArray[bottomCellIndex];
                 if (!bottomCell.IsVisited())
                 {
                     neighbours.Add(bottomCell);
@@ -130,7 +130,7 @@ namespace Raycasting_maze
             return neighbours;
         }
 
-        private void RemoveWallBetweenCells(Cell currentCell, Cell neighbourCell)
+        private static void RemoveWallBetweenCells(Cell currentCell, Cell neighbourCell)
         {
             if (currentCell.GetRow() - neighbourCell.GetRow() == 0)
             {
@@ -138,8 +138,8 @@ namespace Raycasting_maze
                 {
                     currentCell.RemoveWall(Right);
                     neighbourCell.RemoveWall(Left);
-                } 
-                else 
+                }
+                else
                 {
                     currentCell.RemoveWall(Left);
                     neighbourCell.RemoveWall(Right);
@@ -158,28 +158,28 @@ namespace Raycasting_maze
                     neighbourCell.RemoveWall(Bottom);
                 }
             }
-            
+
         }
 
         /// using the random depth first search for maze generation
         public void GenerateMaze(int startRow, int startCol, int endRow, int endCol)
         {
-            this.PopulateMaze();
+            PopulateMaze();
             Stack<Cell> cellStack = new Stack<Cell>();
-            Cell initCell = this.mazeArray[this.GetMazeArrayIndex(startRow, startCol)];
+            Cell initCell = MazeArray[GetMazeArrayIndex(startRow, startCol)];
             initCell.SetVisited(true);
             cellStack.Push(initCell);
 
             while (cellStack.Count > 0)
             {
                 Cell currentCell = cellStack.Pop();
-                List<Cell> unvisitedNeighbours = this.GetNeighbours(currentCell);
+                List<Cell> unvisitedNeighbours = GetNeighbours(currentCell);
                 if (unvisitedNeighbours.Count > 0)
                 {
                     cellStack.Push(currentCell);
-                    int randomIndex = rnd.Next(unvisitedNeighbours.Count);
+                    int randomIndex = Rnd.Next(unvisitedNeighbours.Count);
                     Cell neighbourCell = unvisitedNeighbours[randomIndex];
-                    this.RemoveWallBetweenCells(currentCell, neighbourCell);
+                    RemoveWallBetweenCells(currentCell, neighbourCell);
                     neighbourCell.SetVisited(true);
                     cellStack.Push(neighbourCell);
                 }
@@ -189,19 +189,21 @@ namespace Raycasting_maze
         ///TODO:
         public int[,] GetMazeBitMap()
         {
-            int[,] mazeBitMap = new int[this.numRows * 2 + 1, this.numCols * 2 + 1];
+            int[,] mazeBitMap = new int[NumRows * 2 + 1, NumCols * 2 + 1];
             // intiializing all as walls
-            for (int i = 0; i < mazeBitMap.GetLength(0); i++){
-                for (int j = 0; j < mazeBitMap.GetLength(1); j++){
-                    mazeBitMap[i,j] = 1;
+            for (int i = 0; i < mazeBitMap.GetLength(0); i++)
+            {
+                for (int j = 0; j < mazeBitMap.GetLength(1); j++)
+                {
+                    mazeBitMap[i, j] = 1;
                 }
             }
 
-            for (int i = 0; i < this.mazeArray.Length; i++)
+            for (int i = 0; i < MazeArray.Length; i++)
             {
-                Cell cell = this.mazeArray[i];
-                int bitMapRow = (i / this.numCols) * 2 + 1;
-                int bitMapCol = (i % this.numCols) * 2 + 1;
+                Cell cell = MazeArray[i];
+                int bitMapRow = (i / NumCols) * 2 + 1;
+                int bitMapCol = (i % NumCols) * 2 + 1;
                 mazeBitMap[bitMapRow, bitMapCol] = 0;
 
                 /// checking lef wall
@@ -219,6 +221,6 @@ namespace Raycasting_maze
             return mazeBitMap;
         }
 
-        
+
     }
 }

@@ -4,75 +4,50 @@ namespace Raycasting_maze
     public class Player
     {
 
-        private float size = 0.2f;
-        private float posX;
-        private float posY;
+        public readonly float Size = 0.2f;
+        public float PosX { get; private set; }
+        public float PosY { get; private set; }
 
-        private float dirX;
-        private float dirY;
+        public float DirX { get; private set; }
+        public float DirY { get; private set; }
 
         // camera vector
-        private float cameraPlaneX;
-        private float cameraPlaneY;
+        public float CameraPlaneX { get; private set; }
+        public float CameraPlaneY { get; private set; }
 
         public Player(float posX, float posY, float dirX, float dirY, float cameraPlaneX, float cameraPlaneY)
         {
-            this.posX = posX;
-            this.posY = posY;
-            this.dirX = dirX;
-            this.dirY = dirY;
-            this.cameraPlaneX = cameraPlaneX;
-            this.cameraPlaneY = cameraPlaneY;
+            PosX = posX;
+            PosY = posY;
+            DirX = dirX;
+            DirY = dirY;
+            CameraPlaneX = cameraPlaneX;
+            CameraPlaneY = cameraPlaneY;
         }
 
-        public float GetPosX()
+        public void SetPosX(float posX)
         {
-            return this.posX;
+            PosX = posX;
         }
-        public float GetPosY()
+        public void SetPosY(float posY)
         {
-            return this.posY;
+            PosY = posY;
         }
-        public void setPosX(float posX)
+        public void SetDirX(float dirX)
         {
-            this.posX = posX;
+            DirX = dirX;
         }
-        public void setPosY(float posY)
+        public void SetDirY(float dirY)
         {
-            this.posY = posY;
+            DirY = dirY;
         }
-        public float GetDirX()
+        public void SetCameraPlaneX(float cameraPlaneX)
         {
-            return this.dirX;
+            CameraPlaneX = cameraPlaneX;
         }
-        public void SetDirX(float dirX){
-            this.dirX = dirX;
-        }
-        public float GetDirY()
+        public void SetCameraPlaneY(float cameraPlaneY)
         {
-            return this.dirY;
-        }
-        public void SetDirY(float dirY){
-            this.dirY = dirY;
-        }
-        public float GetCameraPlaneX()
-        {
-            return this.cameraPlaneX;
-        }
-        public void SetCameraPlaneX(float cameraPlaneX){
-            this.cameraPlaneX = cameraPlaneX;
-        }
-        public float GetCameraPlaneY()
-        {
-            return this.cameraPlaneY;
-        }
-        public void SetCameraPlaneY(float cameraPlaneY){
-            this.cameraPlaneY = cameraPlaneY;
-        }
-
-        public float GetSize()
-        {
-            return this.size;
+            CameraPlaneY = cameraPlaneY;
         }
     }
 }

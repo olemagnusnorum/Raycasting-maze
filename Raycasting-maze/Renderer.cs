@@ -6,109 +6,110 @@ using System;
 
 namespace Raycasting_maze;
 
-public class Renderer {
+public class Renderer
+{
 
-    private int textureWidth = 64;
-    private int textureHeight = 64;
-    private float minimapScale = 0.2f;
+    private readonly int TextureWidth = 64;
+    private readonly int TextureHeight = 64;
+    private readonly float MinimapScale = 0.2f;
 
-    private int fov = 66;
+    private int Fov = 66;
 
-    ContentManager content;
-    private GameState gs;
-    private int cellSize;
-    private int screenHeight;
-    private int  screenWidth;
+    readonly ContentManager Content;
+    private readonly GameState GameState;
+    private int CellSize;
+    private readonly int ScreenHeight;
+    private readonly int ScreenWidth;
 
-    private Texture2D whiteRectangle;
-    private Texture2D wallTexture;
+    private Texture2D WhiteRectangle;
+    private Texture2D WallTexture;
 
-    private Texture2D barrelTexture;
-    private Texture2D skyTexture;
-    private Texture2D floorTexture;
-    private Texture2D floorAndCeilingTexture;
-    private Color[] floorTextureColors;
-    
-    private List<RaycastingResult> raycastingResults = new List<RaycastingResult>();
-    private Color[] floorTextureBuffer;
+    private Texture2D BarrelTexture;
+    private Texture2D SkyTexture;
+    private Texture2D FloorTexture;
+    private Texture2D FloorAndCeilingTexture;
+    private readonly Color[] FloorTextureColors;
 
-    private List<int> indexColored = new List<int>();
+    private readonly List<RaycastingResult> RaycastingResults = new List<RaycastingResult>();
+    private readonly Color[] FloorTextureBuffer;
+
+    private readonly List<int> IndexColored = new List<int>();
 
     public Renderer(ContentManager content, GameState gameState, int screenHeight, int screenWidth)
     {
-        this.gs = gameState;
-        this.content = content;
-        this.screenHeight = screenHeight;
-        this.screenWidth = screenWidth;
-        this.floorTextureBuffer = new Color[this.screenHeight*this.screenWidth];
-        this.floorTextureColors = new Color[this.textureWidth*this.textureHeight];
+        GameState = gameState;
+        Content = content;
+        ScreenHeight = screenHeight;
+        ScreenWidth = screenWidth;
+        FloorTextureBuffer = new Color[screenHeight * screenWidth];
+        FloorTextureColors = new Color[TextureWidth * TextureHeight];
     }
 
     public void Initialize()
     {
-        this.cellSize = this.CalculateCellSize();
+        CellSize = CalculateCellSize();
     }
 
     public void LoadContent(GraphicsDevice graphicsDevice)
     {
-        whiteRectangle = new Texture2D(graphicsDevice, 1, 1);
-        whiteRectangle.SetData(new[] {Color.White});
-        wallTexture = this.content.Load<Texture2D>("brickwall");
-        barrelTexture = this.content.Load<Texture2D>("barrel");
-        skyTexture = this.content.Load<Texture2D>("moonbackground");
-        floorTexture = this.content.Load<Texture2D>("grassfloor");
+        WhiteRectangle = new Texture2D(graphicsDevice, 1, 1);
+        WhiteRectangle.SetData(new[] { Color.White });
+        WallTexture = Content.Load<Texture2D>("brickwall");
+        BarrelTexture = Content.Load<Texture2D>("barrel");
+        SkyTexture = Content.Load<Texture2D>("moonbackground");
+        FloorTexture = Content.Load<Texture2D>("grassfloor");
 
-        floorAndCeilingTexture = new Texture2D(graphicsDevice, this.screenWidth, this.screenHeight);
-        floorTexture.GetData<Color>(floorTextureColors);
+        FloorAndCeilingTexture = new Texture2D(graphicsDevice, ScreenWidth, ScreenHeight);
+        FloorTexture.GetData<Color>(FloorTextureColors);
     }
 
     public void Update()
     {
-        if (!gs.IsTopDownView())
+        if (!GameState.IsTopDownView())
         {
-            this.Raycasting(this.screenWidth, this.screenHeight);
+            Raycasting(ScreenWidth, ScreenHeight);
         }
     }
 
     private int CalculateCellSize()
     {
-        int sizeX = this.screenWidth/gs.GetMazeBitMap().GetLength(1);
-        int sizeY = this.screenHeight/gs.GetMazeBitMap().GetLength(0);
-        return (sizeX < sizeY)? sizeX : sizeY;
+        int sizeX = ScreenWidth / GameState.MazeBitMap.GetLength(1);
+        int sizeY = ScreenHeight / GameState.MazeBitMap.GetLength(0);
+        return (sizeX < sizeY) ? sizeX : sizeY;
     }
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        if (gs.IsTopDownView())
+        if (GameState.IsTopDownView())
         {
-            this.DrawTopDownMaze(spriteBatch, 1.0f);
-            this.DrawPlayer(spriteBatch, 1.0f);
+            DrawTopDownMaze(spriteBatch, 1.0f);
+            DrawPlayer(spriteBatch, 1.0f);
         }
-        else 
+        else
         {
-            spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, 0, this.screenWidth, this.screenHeight/2), Color.Green);
-            spriteBatch.Draw(this.whiteRectangle, new Rectangle(0, this.screenHeight/2, this.screenWidth, this.screenHeight/2), Color.CornflowerBlue);
-            this.DrawSky(spriteBatch);
-            this.DrawWalls(spriteBatch);
-            this.DrawFloor(spriteBatch);
-            this.DrawMinimap(spriteBatch, 0.2f);
+            spriteBatch.Draw(WhiteRectangle, new Rectangle(0, 0, ScreenWidth, ScreenHeight / 2), Color.Green);
+            spriteBatch.Draw(WhiteRectangle, new Rectangle(0, ScreenHeight / 2, ScreenWidth, ScreenHeight / 2), Color.CornflowerBlue);
+            DrawSky(spriteBatch);
+            DrawWalls(spriteBatch);
+            DrawFloor(spriteBatch);
+            DrawMinimap(spriteBatch, 0.2f);
         }
     }
 
     private void DrawTopDownMaze(SpriteBatch spriteBatch, float scale)
     {
-        int[,] mazeBitMap = gs.GetMazeBitMap();
+        int[,] mazeBitMap = GameState.MazeBitMap;
         for (int i = 0; i < mazeBitMap.GetLength(0); i++)
         {
             for (int j = 0; j < mazeBitMap.GetLength(1); j++)
             {
-                if (mazeBitMap[i,j] > 0)
+                if (mazeBitMap[i, j] > 0)
                 {
-                    spriteBatch.Draw(this.whiteRectangle, new Rectangle((int)(this.cellSize*scale)*j, (int)(this.cellSize*scale)*i, (int)(this.cellSize*scale), (int)(this.cellSize*scale)), Color.White);
+                    spriteBatch.Draw(WhiteRectangle, new Rectangle((int)(CellSize * scale) * j, (int)(CellSize * scale) * i, (int)(CellSize * scale), (int)(CellSize * scale)), Color.White);
                 }
                 else
                 {
-                    spriteBatch.Draw(this.whiteRectangle, new Rectangle((int)(this.cellSize*scale)*j, (int)(this.cellSize*scale)*i, (int)(this.cellSize*scale), (int)(this.cellSize*scale)), Color.Black);
+                    spriteBatch.Draw(WhiteRectangle, new Rectangle((int)(CellSize * scale) * j, (int)(CellSize * scale) * i, (int)(CellSize * scale), (int)(CellSize * scale)), Color.Black);
                 }
             }
         }
@@ -117,84 +118,84 @@ public class Renderer {
     private void DrawPlayer(SpriteBatch spriteBatch, float scale)
     {
         spriteBatch.Draw(
-            this.whiteRectangle, 
-            new Rectangle(((int)(this.cellSize*scale)*(int)gs.GetPlayer().GetPosX() + (int)(this.cellSize*this.minimapScale)), 
-                        ((int)(this.cellSize*scale)*(int)gs.GetPlayer().GetPosY() + (int)(this.cellSize*this.minimapScale)), 
-                        (int)(this.cellSize*scale) - 2*(int)(this.cellSize*this.minimapScale), 
-                        (int)(this.cellSize*scale) - 2*(int)(this.cellSize*this.minimapScale)), 
+            WhiteRectangle,
+            new Rectangle(((int)(CellSize * scale) * (int)GameState.Player.PosX + (int)(CellSize * MinimapScale)),
+                        ((int)(CellSize * scale) * (int)GameState.Player.PosY + (int)(CellSize * MinimapScale)),
+                        (int)(CellSize * scale) - 2 * (int)(CellSize * MinimapScale),
+                        (int)(CellSize * scale) - 2 * (int)(CellSize * MinimapScale)),
             Color.Orange);
     }
 
 
     private void DrawMinimap(SpriteBatch spriteBatch, float scale)
     {
-        this.DrawTopDownMaze(spriteBatch, scale);
-        this.DrawPlayer(spriteBatch, scale);
+        DrawTopDownMaze(spriteBatch, scale);
+        DrawPlayer(spriteBatch, scale);
     }
 
     private void DrawWalls(SpriteBatch spriteBatch)
     {
-        foreach(RaycastingResult result in this.raycastingResults)
+        foreach (RaycastingResult result in RaycastingResults)
         {
-            int textureXIndex = (int)(this.textureWidth * result.PresentageAllongTheWall);
-            spriteBatch.Draw(this.wallTexture, new Rectangle(result.X, result.Y, result.Width, result.Height), new Rectangle(textureXIndex, 0, 1, this.textureHeight), result.Shaiding);
-            
+            int textureXIndex = (int)(TextureWidth * result.PresentageAllongTheWall);
+            spriteBatch.Draw(WallTexture, new Rectangle(result.X, result.Y, result.Width, result.Height), new Rectangle(textureXIndex, 0, 1, TextureHeight), result.Shaiding);
+
         }
     }
 
     private void DrawFloor(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(this.floorAndCeilingTexture, new Rectangle(0, 0, this.screenWidth, this.screenHeight), Color.White);
-        
+        spriteBatch.Draw(FloorAndCeilingTexture, new Rectangle(0, 0, ScreenWidth, ScreenHeight), Color.White);
+
     }
 
     private void DrawSky(SpriteBatch spriteBatch)
     {
-        int x = (int) gs.GetPlayerAngle();
+        int x = (int)GameState.PlayerAngle;
         x = (int)(x * 16.45);
         int skyTextureWidth = 5924;
         if (x + 1100 >= skyTextureWidth)
         {
             int wrapX = (x + 1100) % 5924;
-            float p1 = (skyTextureWidth-x)/1100f;
-            spriteBatch.Draw(skyTexture, new Rectangle(0, 0, (int)(this.screenWidth*p1), this.screenHeight/2), new Rectangle(x, 0, skyTextureWidth-x, 275), Color.White);
-            spriteBatch.Draw(skyTexture, new Rectangle((int)(this.screenWidth*p1), 0, this.screenWidth-(int)(this.screenWidth*p1), this.screenHeight/2), new Rectangle(0, 0, wrapX, 275), Color.White);
+            float p1 = (skyTextureWidth - x) / 1100f;
+            spriteBatch.Draw(SkyTexture, new Rectangle(0, 0, (int)(ScreenWidth * p1), ScreenHeight / 2), new Rectangle(x, 0, skyTextureWidth - x, 275), Color.White);
+            spriteBatch.Draw(SkyTexture, new Rectangle((int)(ScreenWidth * p1), 0, ScreenWidth - (int)(ScreenWidth * p1), ScreenHeight / 2), new Rectangle(0, 0, wrapX, 275), Color.White);
         }
         else
         {
-            spriteBatch.Draw(skyTexture, new Rectangle(0, 0, this.screenWidth, this.screenHeight/2), new Rectangle(x, 0, 1100, 275), Color.White);
+            spriteBatch.Draw(SkyTexture, new Rectangle(0, 0, ScreenWidth, ScreenHeight / 2), new Rectangle(x, 0, 1100, 275), Color.White);
         }
     }
 
     private void Raycasting(int screenWidth, int screenHeight)
     {
-        this.raycastingResults.Clear();
-        foreach (int indexColored in this.indexColored)
+        RaycastingResults.Clear();
+        foreach (int indexColored in IndexColored)
         {
-            this.floorTextureBuffer[indexColored] = Color.Transparent; 
+            FloorTextureBuffer[indexColored] = Color.Transparent;
         }
-        this.indexColored.Clear();
-    
+        IndexColored.Clear();
+
         for (int x = 0; x < screenWidth; x++)
         {
             // calculate the scalar for the camera plane, to find the direction of the ray to cast
-            float cameraPlaneScalar = 2*x / (float)screenWidth - 1;
-            
+            float cameraPlaneScalar = 2 * x / (float)screenWidth - 1;
+
             // calculating the direction of the ray (rayDir = dv + cv * a)
-            float rayDirX = gs.GetPlayer().GetDirX() + gs.GetPlayer().GetCameraPlaneX() * cameraPlaneScalar;
-            float rayDirY = gs.GetPlayer().GetDirY() + gs.GetPlayer().GetCameraPlaneY() * cameraPlaneScalar;
+            float rayDirX = GameState.Player.DirX + GameState.Player.CameraPlaneX * cameraPlaneScalar;
+            float rayDirY = GameState.Player.DirY + GameState.Player.CameraPlaneY * cameraPlaneScalar;
 
             //calculating the ratios of the deltaDists
-            float deltaDistX = (rayDirX == 0)? 1e30f : Math.Abs(1/rayDirX);
-            float deltaDistY = (rayDirY == 0)? 1e30f : Math.Abs(1/rayDirY);
+            float deltaDistX = (rayDirX == 0) ? 1e30f : Math.Abs(1 / rayDirX);
+            float deltaDistY = (rayDirY == 0) ? 1e30f : Math.Abs(1 / rayDirY);
 
             // the cell the player is in
-            int cellX = (int) gs.GetPlayer().GetPosX();
-            int cellY = (int) gs.GetPlayer().GetPosY();
+            int cellX = (int)GameState.Player.PosX;
+            int cellY = (int)GameState.Player.PosY;
 
             // the length to the wall in the current cell
             float cellWallDistX;
-            float cellWallDistY; 
+            float cellWallDistY;
 
             // what direction do we take a step in
             int stepX;
@@ -204,23 +205,23 @@ public class Renderer {
             if (rayDirX < 0)
             {
                 stepX = -1;
-                cellWallDistX = (gs.GetPlayer().GetPosX() - cellX) * deltaDistX;
+                cellWallDistX = (GameState.Player.PosX - cellX) * deltaDistX;
             }
             else
             {
                 stepX = 1;
-                cellWallDistX = (cellX + 1 - gs.GetPlayer().GetPosX()) * deltaDistX;
+                cellWallDistX = (cellX + 1 - GameState.Player.PosX) * deltaDistX;
             }
             // finding stepY and cellWallDistY
             if (rayDirY < 0)
             {
                 stepY = -1;
-                cellWallDistY = (gs.GetPlayer().GetPosY() - cellY) * deltaDistY;
+                cellWallDistY = (GameState.Player.PosY - cellY) * deltaDistY;
             }
             else
             {
                 stepY = 1;
-                cellWallDistY = (cellY + 1 - gs.GetPlayer().GetPosY()) * deltaDistY;
+                cellWallDistY = (cellY + 1 - GameState.Player.PosY) * deltaDistY;
             }
 
             // The DDA loop for finding walls and distance
@@ -242,10 +243,10 @@ public class Renderer {
                     hitVericalWall = false;
                 }
                 // checking if ray hit wall
-                if (gs.RayOutOfBounds(cellX, cellY)) break;
-                if (gs.GetMazeBitMap()[cellY, cellX] > 0)
+                if (GameState.RayOutOfBounds(cellX, cellY)) break;
+                if (GameState.MazeBitMap[cellY, cellX] > 0)
                 {
-                    textureId = gs.GetMazeBitMap()[cellY, cellX];
+                    textureId = GameState.MazeBitMap[cellY, cellX];
                     hit = true;
                 }
             }
@@ -258,28 +259,28 @@ public class Renderer {
             {
                 hitWallDist = cellWallDistX - deltaDistX;
             }
-            else 
+            else
             {
                 hitWallDist = cellWallDistY - deltaDistY;
             }
 
             // calculate the height of the wall on screen
             int lineHeight = (int)(screenHeight / (hitWallDist));
-            //if (lineHeight > this.screenHeight)
+            //if (lineHeight > screenHeight)
             //{
-            //    lineHeight = this.screenHeight;
+            //    lineHeight = screenHeight;
             //}
 
             // calclating where the on the wall the ray hit
             float presentageAllongTheWall;
             if (hitVericalWall)
             {
-                float exactWallHit = gs.GetPlayer().GetPosY() + rayDirY * hitWallDist;
+                float exactWallHit = GameState.Player.PosY + rayDirY * hitWallDist;
                 presentageAllongTheWall = exactWallHit - (float)Math.Floor((double)exactWallHit);
             }
             else
             {
-                float exactWallHit = gs.GetPlayer().GetPosX() + rayDirX * hitWallDist;
+                float exactWallHit = GameState.Player.PosX + rayDirX * hitWallDist;
                 presentageAllongTheWall = exactWallHit - (float)Math.Floor((double)exactWallHit);
             }
 
@@ -295,22 +296,22 @@ public class Renderer {
             {
                 presentageAllongTheWall = 1 - presentageAllongTheWall;
             }
-            
-            //int textureXIndex = (int) (presentageAllongTheWall * this.textureWidth);
+
+            //int textureXIndex = (int) (presentageAllongTheWall * textureWidth);
             int y = -lineHeight / 2 + screenHeight / 2;
 
             // adding shaiding
             int minShadow = 30;
             int longestDistance = 10;
-            float shadowScaler = Math.Min(hitWallDist/longestDistance, 1.0f);
+            float shadowScaler = Math.Min(hitWallDist / longestDistance, 1.0f);
             shadowScaler = 1 - shadowScaler;
             shadowScaler = shadowScaler * (255 - minShadow);
             shadowScaler = shadowScaler + minShadow;
             Color shadow = new Color((int)shadowScaler, (int)shadowScaler, (int)shadowScaler);
             // adding to raycaster results
-            this.raycastingResults.Add(new RaycastingResult(textureId, x, y, 1, lineHeight, presentageAllongTheWall, shadow));
+            RaycastingResults.Add(new RaycastingResult(textureId, x, y, 1, lineHeight, presentageAllongTheWall, shadow));
 
-            
+
             // Floorcasting and Ceilingcasting
             float firstFloorX;
             float firstFloorY;
@@ -345,30 +346,29 @@ public class Renderer {
             float floorShadowScaler = 0;
             for (int pixelRow = wallEnd; pixelRow < screenHeight; pixelRow++)
             {
-                currentDistance = screenHeight / (2.0f*pixelRow - screenHeight);
-                float scale = currentDistance/distanceFromWall;
-                float currentFloorX = scale * firstFloorX + (1.0f - scale) * gs.GetPlayer().GetPosX();
-                float currentFloorY = scale * firstFloorY + (1.0f - scale) * gs.GetPlayer().GetPosY();
-               
-                int textureX = (int) (currentFloorX * this.textureWidth) % this.textureWidth;
-                int textureY = (int) (currentFloorY * this.textureHeight) % this.textureHeight;
-                Color floorTextureColor = this.floorTextureColors[this.textureWidth * textureY + textureX];
+                currentDistance = screenHeight / (2.0f * pixelRow - screenHeight);
+                float scale = currentDistance / distanceFromWall;
+                float currentFloorX = scale * firstFloorX + (1.0f - scale) * GameState.Player.PosX;
+                float currentFloorY = scale * firstFloorY + (1.0f - scale) * GameState.Player.PosY;
+
+                int textureX = (int)(currentFloorX * TextureWidth) % TextureWidth;
+                int textureY = (int)(currentFloorY * TextureHeight) % TextureHeight;
+                Color floorTextureColor = FloorTextureColors[TextureWidth * textureY + textureX];
                 // adding shaid to the floor
-                floorShadowScaler = 1/currentDistance;
+                floorShadowScaler = 1 / currentDistance;
                 floorShadowScaler = floorShadowScaler * (255 - minShadow);
                 floorShadowScaler = floorShadowScaler + minShadow;
-                floorTextureColor.R = (byte) (int)(Convert.ToInt32(floorTextureColor.R) * floorShadowScaler/255);
-                floorTextureColor.G = (byte) (int)(Convert.ToInt32(floorTextureColor.G) * floorShadowScaler/255);
-                floorTextureColor.B = (byte) (int)(Convert.ToInt32(floorTextureColor.B) * floorShadowScaler/255);
-                this.floorTextureBuffer[this.screenWidth * pixelRow + x] = floorTextureColor;
+                floorTextureColor.R = (byte)(int)(Convert.ToInt32(floorTextureColor.R) * floorShadowScaler / 255);
+                floorTextureColor.G = (byte)(int)(Convert.ToInt32(floorTextureColor.G) * floorShadowScaler / 255);
+                floorTextureColor.B = (byte)(int)(Convert.ToInt32(floorTextureColor.B) * floorShadowScaler / 255);
+                FloorTextureBuffer[screenWidth * pixelRow + x] = floorTextureColor;
                 //ceiling is just mirrored since they share the tile
-                //this.floorTextureBuffer[this.screenWidth * (this.screenHeight - pixelRow) + x] = floorTextureColor;
-                
-                this.indexColored.Add(this.screenWidth * pixelRow + x);
+                //floorTextureBuffer[screenWidth * (screenHeight - pixelRow) + x] = floorTextureColor;
+
+                IndexColored.Add(screenWidth * pixelRow + x);
             }
         }
-        
-        this.floorAndCeilingTexture.SetData<Color>(this.floorTextureBuffer);
-    }
 
+        FloorAndCeilingTexture.SetData<Color>(FloorTextureBuffer);
+    }
 }
